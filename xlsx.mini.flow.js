@@ -6183,6 +6183,17 @@ function parse_fills(t, styles, themes, opts) {
 				if(y.tint) fill.bgColor.tint = parseFloat(y.tint);
 				/* Excel uses ARGB strings */
 				if(y.rgb) fill.bgColor.rgb = y.rgb.slice(-6);
+
+				if (
+					fill.bgColor.theme !== undefined
+					&& themes.themeElements
+					&& themes.themeElements.clrScheme
+					&& themes.themeElements.clrScheme[fill.bgColor.theme]
+					&& themes.themeElements.clrScheme[fill.bgColor.theme].rgb
+				) {
+					fill.bgColor.rgb = rgb_tint(themes.themeElements.clrScheme[fill.bgColor.theme].rgb, fill.bgColor.tint || 0);
+				}
+
 				break;
 			case '<bgColor/>': case '</bgColor>': break;
 
@@ -6194,6 +6205,17 @@ function parse_fills(t, styles, themes, opts) {
 				if(y.tint) fill.fgColor.tint = parseFloat(y.tint);
 				/* Excel uses ARGB strings */
 				if(y.rgb != null) fill.fgColor.rgb = y.rgb.slice(-6);
+
+				if (
+					fill.fgColor.theme !== undefined
+					&& themes.themeElements
+					&& themes.themeElements.clrScheme
+					&& themes.themeElements.clrScheme[fill.fgColor.theme]
+					&& themes.themeElements.clrScheme[fill.fgColor.theme].rgb
+				) {
+					fill.fgColor.rgb = rgb_tint(themes.themeElements.clrScheme[fill.fgColor.theme].rgb, fill.fgColor.tint || 0);
+				}
+
 				break;
 			case '<fgColor/>': case '</fgColor>': break;
 
