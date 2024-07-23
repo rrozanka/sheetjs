@@ -113,6 +113,7 @@ function parse_fills(t, styles, themes, opts) {
 			/* 18.8.19 fgColor CT_Color */
 			case '<fgColor':
 				if(!fill.fgColor) fill.fgColor = {};
+				if(y.indexed) fill.fgColor.indexed = parseInt(y.indexed, 10);
 				if(y.theme) fill.fgColor.theme = parseInt(y.theme, 10);
 				if(y.tint) fill.fgColor.tint = parseFloat(y.tint);
 				/* Excel uses ARGB strings */
@@ -368,6 +369,29 @@ function write_cellXfs(cellXfs)/*:string*/ {
 	return o.join("");
 }
 
+function parse_colors(t, styles) {
+	styles.Colors = { IndexedColors: [] };
+
+	(t[0].match(tagregex)||[]).forEach(function(x) {
+		var y = parsexmltag(x);
+
+		switch(strip_ns(y[0])) {
+			case '<colors': case '<colors>': case '</colors>': break;
+
+			case '<indexedColors': case '<indexedColors>': case '</indexedColors>': break;
+
+			case '<rgbColor': case '<rgbColor>': case '<rgbColor/>':
+				rgbColor = {};
+				if(y.rgb) rgbColor.rgb = y.rgb;
+				styles.Colors.IndexedColors.push(rgbColor);
+				break;
+			case '</rgbColor>': break;
+
+			default: throw new Error('unrecognized ' + y[0] + ' in colors');
+		}
+	});
+}
+
 /* 18.8 Styles CT_Stylesheet*/
 var parse_sty_xml= (function make_pstyx() {
 var numFmtRegex = /<(?:\w+:)?numFmts([^>]*)>[\S\s]*?<\/(?:\w+:)?numFmts>/;
@@ -375,6 +399,7 @@ var cellXfRegex = /<(?:\w+:)?cellXfs([^>]*)>[\S\s]*?<\/(?:\w+:)?cellXfs>/;
 var fillsRegex = /<(?:\w+:)?fills([^>]*)>[\S\s]*?<\/(?:\w+:)?fills>/;
 var fontsRegex = /<(?:\w+:)?fonts([^>]*)>[\S\s]*?<\/(?:\w+:)?fonts>/;
 var bordersRegex = /<(?:\w+:)?borders([^>]*)>[\S\s]*?<\/(?:\w+:)?borders>/;
+var colorsRegex = /<(?:\w+:)?colors([^>]*)>[\S\s]*?<\/(?:\w+:)?colors>/;
 
 return function parse_sty_xml(data, themes, opts) {
 	var styles = {};
@@ -404,6 +429,8 @@ return function parse_sty_xml(data, themes, opts) {
 	/* 18.8.15 dxfs CT_Dxfs ? */
 	/* 18.8.42 tableStyles CT_TableStyles ? */
 	/* 18.8.11 colors CT_Colors ? */
+	if((t=data.match(colorsRegex))) parse_colors(t, styles, opts);
+
 	/* 18.2.10 extLst CT_ExtensionList ? */
 
 	return styles;
