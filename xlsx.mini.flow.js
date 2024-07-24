@@ -6484,8 +6484,6 @@ function parse_colors(t, styles) {
 				styles.Colors.IndexedColors.push(rgbColor);
 				break;
 			case '</rgbColor>': break;
-
-			default: throw new Error('unrecognized ' + y[0] + ' in colors');
 		}
 	});
 }
